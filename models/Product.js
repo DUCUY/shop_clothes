@@ -31,6 +31,15 @@ const ProductSchema = new mongoose.Schema(
         comments:[{
             type: mongoose.Schema.Types.ObjectId,
             ref: 'Comment'
+        }],
+        rate : [{
+            userId: { 
+                type: mongoose.Schema.Types.ObjectId,
+                ref: 'User',
+            },
+            star: {
+                type: Number,
+            }
         }]
     },
     { timestamps: true }

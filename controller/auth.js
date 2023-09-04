@@ -4,26 +4,23 @@ const jwt = require("jsonwebtoken");
 
 // Register
 const createUser = async (req, res) => {
-        // return res.status(200).json({"hahaha": "ok"});
     try {
-        // console.log(req.body);
     const check = await User.findOne({ email : req.body.email});
     if (check) {
       
-        return res.status(400).json({ state: "failure" });
+        return res.status(400).json( "Email đã tồn tại!" );
     } 
     const newUser = new User({
         username: req.body.username,
         email: req.body.email,
         password: CryptoJS.AES.encrypt(req.body.password, process.env.PASS_SECRET).toString(),
     });
-        // const savedUser = await newUser.save();
-        // res.status(201).json(savedUser);
+
         const savedUser = await newUser.save();
-        return res.status(200).json({savedUser});
+        res.status(200).json(savedUser);
        
-    } catch (err) {
-        return res.status(500);
+    } catch (error) {
+        res.status(500).json(error);
     }
 };
 
@@ -56,6 +53,21 @@ const login = async (req, res) => {
 };
 
 // Logout 
+const logout = async (req, res) => {
+    try {
+        const accessToken = jwt.sign({
+            id: user._id,
+            isAdmin: user.isAdmin,
+        },
+        process.env.JWT_SECRET,
+        {expiresIn: ""}
+        );
 
+        res.status(200).json("Đăng xuất thành công.");
+    } catch (err) {
+        res.status(500).json(err);
+    }
+};
+// Forget password
 
-module.exports = { createUser, login };
+module.exports = { createUser, login, logout };

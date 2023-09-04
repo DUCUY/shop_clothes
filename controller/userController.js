@@ -1,3 +1,4 @@
+const Product = require("../models/Product");
 const User = require("../models/User");
 const CryptoJS = require("crypto-js");
 
@@ -84,4 +85,68 @@ const statsUser = async (req, res) => {
     }
 };
 
-module.exports = { updateUsers, deleteUser, getUser, getAllUsers, statsUser };
+// Update favorites 
+// const updateFavorites = async (req, res) => {
+//     const userId = req.params.userId;
+//     const productId = req.params.productId;
+    
+//     try {
+//         const favorite = new User( { userId, productId } );
+
+//         if (favorite) {
+//             await User.findByIdAndDelete( { userId, productId } );
+//             res.status(200).json("Cập nhật sản phẩm yêu thích thành công.");
+//         } else {
+//             await favorite.save();
+//             res.status(200).json("Cập nhật sản phẩm yêu thích thành công.");
+//         }
+
+//     } catch(err) {
+//         res.status(500).json("Đã xảy ra lỗi khi cập nhật sản phẩm yêu thích!");
+//     }
+// };
+
+// ADD favorites 
+const createFavorites = async (req, res) => {
+    const userId = req.params.userId;
+    const productId = req.params.productId;
+
+    try {
+        const favorite = new User({ userId, productId });
+        await favorite.save();
+        res.status(200).json("Cập nhật sản phẩm yêu thích thành công.");
+
+    } catch (err) {
+        res.status(500).json("Đã xảy ra lỗi khi cập nhật sản phẩm yêu thích!");
+    }
+};
+
+// Delete favorite
+const deleteFavorites = async (req, res) => {
+    const userId = req.params.userId;
+    const productId = req.params.productId;
+
+    try {
+        await User.findByIdAndDelete({ userId, productId });
+        res.status(200).json("Cập nhật sản phẩm yêu thích thành công.");
+
+    } catch (err) {
+        res.status(500).json("Đã xảy ra lỗi khi cập nhật sản phẩm yêu thích!");
+    }
+};
+
+//Get favorites
+const getFavorites = async (req, res) => {
+    const userId = req.params.userId;
+
+    try {
+        const favorites = await Product.find( {userId} );
+        res.status(200).json(favorites);
+    } catch (err) {
+        res.status(500).json("Đã xảy ra lỗi khi lấy danh sách sản phẩm yêu thích!");
+    }
+};
+
+
+
+module.exports = { updateUsers, deleteUser, getUser, getAllUsers, statsUser, createFavorites, getFavorites, deleteFavorites };

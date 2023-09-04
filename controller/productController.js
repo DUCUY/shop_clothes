@@ -76,5 +76,47 @@ const getAllProduct = async (req, res) => {
     }
 };
 
+// Update Rate 
+// ADD rate
+const createRate = async (req, res) => {
+    const {productId, userId, rate} = req.body;
 
-module.exports = { createProduct, updateProduct, updateProduct, deleteProduct, getProduct, getAllProduct };
+    if (rate < 1 || rate > 5) {
+        res.status(400).json("Số sao đánh giá không hợp lệ!");
+    } 
+
+    try {
+        const newRate = new Product({ productId, userId, rate})
+        await newRate.save();
+        res.status(200).json("Đánh giá sản phẩm thành công.");
+
+    } catch (err){
+        res.status(500).json("Đã xảy ra lỗi khi đánh giá sản phẩm!");
+    }
+};
+
+
+// Get Rate trung binh cua so luong rate
+const getRate = async (req, res) => {
+    const productId = req.params.productId;
+
+    try {
+        const rate = await Product.find( { productId } );
+
+        if (rate.length === 0) {
+            res.status(404).json("Sản phẩm chưa có đánh giá nào!");
+        }
+
+        // Tinh diem trung binh 
+        const totalRate = rate.reduce((acc, cur) => acc + cur.rate, 0);
+        const averageRate = totalRate / rate.length;
+
+        res.status(200).json({ averageRate, rate });
+
+    } catch (err) {
+        res.status(500).json("Đã xảy ra lỗi khi lấy đánh giá sản phẩm!");
+    }
+};
+
+
+module.exports = { createProduct, updateProduct, updateProduct, deleteProduct, getProduct, getAllProduct, createRate, getRate };
