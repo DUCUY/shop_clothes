@@ -3,33 +3,41 @@ const mongoose = require('mongoose');
 const UserSchema = new mongoose.Schema(
     {
         username: {
-            type : String,
+            type: String,
             required: true,
         },
         email: {
-            type : String, 
+            type: String,
             required: true,
             unique: true
         },
         password: {
-            type : String, 
+            type: String,
             required: true
         },
         isAdmin: {
             type: Boolean,
             default: false,
         },
-        favoriteProduct : [
+        favoriteProduct: [
+
             {
-                products:[
-                    {
-                        productId: { 
-                            type : mongoose.Types.ObjectId,
-                            ref: 'Product',
-                        }
-                    },
-                ],
+                type: mongoose.Types.ObjectId,
+                ref: 'Product',
             }
+
+        ],
+        comments: [
+            {
+               productId: {
+                type: mongoose.Types.ObjectId,
+                ref: 'Product'
+            },
+                content: {
+                type: String,
+                required: true
+            },
+        }
         ]
     },
     { timestamps: true }

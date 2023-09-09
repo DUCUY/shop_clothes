@@ -3,16 +3,16 @@ const mongoose = require('mongoose');
 const ProductSchema = new mongoose.Schema(
     {
         title: {
-            type : String,
+            type: String,
             required: true,
             unique: true
         },
         description: {
-            type : String, 
+            type: String,
             required: true,
         },
         img: {
-            type : String, 
+            type: String,
             required: true
         },
         categories: {
@@ -22,25 +22,49 @@ const ProductSchema = new mongoose.Schema(
             type: Array
         },
         color: {
-            type : Array
+            type: Array
         },
         price: {
             type: Number,
             required: true
         },
-        comments:[{
+        comments: [{
             type: mongoose.Schema.Types.ObjectId,
             ref: 'Comment'
         }],
-        rate : [{
-            userId: { 
+        totalRate:{
+            type:Number
+        },
+        rate: [
+            {
+            userId: {
                 type: mongoose.Schema.Types.ObjectId,
                 ref: 'User',
             },
             star: {
                 type: Number,
             }
-        }]
+        }],
+        favoriteUser: [
+            {
+
+                type: mongoose.Types.ObjectId,
+                ref: 'User',
+
+            }
+        ],
+        comments: [
+            {
+                userId: {
+                type: mongoose.Types.ObjectId,
+                ref: 'User'
+            },
+                content: {
+                type: String,
+                required: true
+            },
+        }
+        ]
     },
     { timestamps: true }
 );

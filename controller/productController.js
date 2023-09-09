@@ -1,4 +1,5 @@
 const Product = require("../models/Product");
+const User = require("../models/User");
 
 
 //create product 
@@ -31,12 +32,12 @@ const updateProduct = async (req, res) => {
     }
 };
 
-// // Delete user
+// // Delete product
 const deleteProduct = async (req, res) => {
     try {
         await Product.findByIdAndDelete(req.params.id)
         res.status(200).json("Sản phẩm đã bị xóa.")
-    }catch(err){
+    } catch (err) {
         res.status(500).json(err);
     }
 };
@@ -46,7 +47,7 @@ const getProduct = async (req, res) => {
     try {
         const product = await Product.findById(req.params.id)
         res.status(200).json(product);
-    }catch(err){
+    } catch (err) {
         res.status(500).json(err);
     }
 };
@@ -56,41 +57,81 @@ const getAllProduct = async (req, res) => {
     const qNew = req.query.new;
     const qCategory = req.query.category;
     try {
-       let products;
+        let products;
 
-       if(qNew) {
-        products = await Product.find().sort({ createdAt: -1}).limit(5)
-       } else if(qCategory) {
-        products = await Product.find({
-            categories: {
-                $in: [qCategory],
-            },
-        });
-       } else {
-        products = await Product.find();
-       }
-        
+        if (qNew) {
+            products = await Product.find().sort({ createdAt: -1 }).limit(5)
+        } else if (qCategory) {
+            products = await Product.find({
+                categories: {
+                    $in: [qCategory],
+                },
+            });
+        } else {
+            products = await Product.find();
+        }
+
         res.status(200).json(products);
-    }catch(err){
+    } catch (err) {
         res.status(500).json(err);
     }
 };
 
 // Update Rate 
 // ADD rate
-const createRate = async (req, res) => {
-    const {productId, userId, rate} = req.body;
-
-    if (rate < 1 || rate > 5) {
-        res.status(400).json("Số sao đánh giá không hợp lệ!");
-    } 
-
+const vote = async (req, res) => {
     try {
-        const newRate = new Product({ productId, userId, rate})
-        await newRate.save();
+        const { productId, userId, rate } = req.body;
+        const user = await User.findById(userId);
+        if (!user) {
+            res.status(400).json({ message: 'User not found' });
+        }
+        const product = await Product.findById(productId);
+
+        if (!product) {
+            res.status(400).json({ message: 'Product not found' });
+        }
+        if (rate < 1 || rate > 5) {
+            res.status(400).json("Số sao đánh giá không hợp lệ!");
+        }
+
+        const check = product.rate.find((userRate) => {
+            if (userRate.userId.toString() === userId.toString()) {
+                return userRate._id
+            }
+            
+            return false
+        })
+        if (!check) {
+            const newRate = await Product.findByIdAndUpdate(productId, {
+                $push: { rate: { userId, star: rate } }
+            }, { new: true });
+            if (!newRate) {
+                res.status(400).json({ message: 'Error' });
+            }
+        } else {
+            const idVote = check;
+            const newArrRate = product.rate.filter((item) => {
+                return idVote._id.toString() !== item._id.toString()
+            })
+            newArrRate.push({
+                userId,
+                star: rate
+            })
+
+
+            const newRate = await Product.findByIdAndUpdate(productId, {
+                rate: newArrRate
+            }, { new: true });
+
+            if (!newRate) {
+                res.status(400).json({ message: 'Error' });
+            }
+        }
+
         res.status(200).json("Đánh giá sản phẩm thành công.");
 
-    } catch (err){
+    } catch (err) {
         res.status(500).json("Đã xảy ra lỗi khi đánh giá sản phẩm!");
     }
 };
@@ -98,20 +139,20 @@ const createRate = async (req, res) => {
 
 // Get Rate trung binh cua so luong rate
 const getRate = async (req, res) => {
-    const productId = req.params.productId;
 
     try {
-        const rate = await Product.find( { productId } );
+        const productId = req.params.productId;
+        const product = await Product.find({ productId });
 
-        if (rate.length === 0) {
+        if (product.rate.length === 0) {
             res.status(404).json("Sản phẩm chưa có đánh giá nào!");
         }
 
         // Tinh diem trung binh 
-        const totalRate = rate.reduce((acc, cur) => acc + cur.rate, 0);
-        const averageRate = totalRate / rate.length;
+        const totalRate = product.rate.reduce((acc, cur) => acc + cur.rate, 0);
+        const averageRate = totalRate / product.rate.length;
 
-        res.status(200).json({ averageRate, rate });
+        res.status(200).json({ averageRate });
 
     } catch (err) {
         res.status(500).json("Đã xảy ra lỗi khi lấy đánh giá sản phẩm!");
@@ -119,4 +160,4 @@ const getRate = async (req, res) => {
 };
 
 
-module.exports = { createProduct, updateProduct, updateProduct, deleteProduct, getProduct, getAllProduct, createRate, getRate };
+module.exports = { createProduct, updateProduct, updateProduct, deleteProduct, getProduct, getAllProduct, vote, getRate };

@@ -7,7 +7,7 @@ const userRoute = require('./routes/userRoute');
 const productRoute = require('./routes/productRoute');
 const cartRoute = require('./routes/cartRoute');
 const orderRoute = require('./routes/orderRoute');
-const commentRoute = require('./routes/commentRoute');
+
 
 
 dbConnect();
@@ -19,7 +19,7 @@ app.use("/api/auth", authRoute);
 app.use("/api/products", productRoute);
 app.use("/api/carts", cartRoute);
 app.use("/api/orders", orderRoute);
-app.use("/api/comments", commentRoute);
+
 
 
 
