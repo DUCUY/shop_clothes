@@ -23,9 +23,9 @@ const updateOrder = async (req, res) => {
             },
             { new: true }
         );
-        res.status(200).json(updatedOrder);
+        return res.status(200).json(updatedOrder);
     } catch (err) {
-        res.status(500).json("Không cập nhật được!");
+        return res.status(500).json("Không cập nhật được!");
     }
 };
 
@@ -33,9 +33,9 @@ const updateOrder = async (req, res) => {
 const deleteOrder = async (req, res) => {
     try {
         await Order.findByIdAndDelete(req.params.id)
-        res.status(200).json("Giỏ hàng đã bị xóa.")
+        return res.status(200).json("Giỏ hàng đã bị xóa.")
     } catch (err) {
-        res.status(500).json(err);
+        return res.status(500).json(err);
     }
 };
 
@@ -43,9 +43,9 @@ const deleteOrder = async (req, res) => {
 const getOrder = async (req, res) => {
     try {
         const orders = await Order.find({ userId: req.params.userId })
-        res.status(200).json(orders);
+        return res.status(200).json(orders);
     } catch (err) {
-        res.status(500).json(err);
+        return res.status(500).json(err);
     }
 };
 
@@ -54,9 +54,9 @@ const getOrder = async (req, res) => {
 const getAllOrder = async (req, res) => {
     try {
         const orders = await Order.find();
-        res.status(200).json(orders);
+        return res.status(200).json(orders);
     } catch (err) {
-        re.status(500).json(err);
+        return res.status(500).json(err);
     }
 };
 

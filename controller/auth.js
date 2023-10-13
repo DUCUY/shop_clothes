@@ -28,13 +28,14 @@ const createUser = async (req, res) => {
 const login = async (req, res) => {
     try {
         const user = await User.findOne({ email: req.body.email });
-        !user && res.status(401).json("Thông tin không hợp lệ!")
+        
+        if(!user)  return res.status(400).json("Thông tin không hợp lệ!");
 
         const hashedPassword = CryptoJS.AES.decrypt(user.password, process.env.PASS_SECRET);
 
         const passwordHashed = hashedPassword.toString(CryptoJS.enc.Utf8);
 
-        passwordHashed !== req.body.password && res.status(401).json("Mật khẩu không chính xác!");
+        if(passwordHashed !== req.body.password) return res.status(400).json("Mật khẩu không chính xác!");
 
         const accessToken = jwt.sign({
             id: user._id,
@@ -46,9 +47,9 @@ const login = async (req, res) => {
 
         const { password, ...others } = user._doc;
 
-        res.status(200).json({...others, accessToken});
+        return res.status(200).json({...others, accessToken});
     } catch (err) {
-        res.status(500).json(err);
+       return res.status(500).json(err);
     }
 };
 
