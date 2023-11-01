@@ -1,12 +1,30 @@
 const Order = require("../models/Order");
+const User = require("../models/User");
 
 //create order 
 const createOrder = async (req, res) => {
-    const newOrder = new Order(req.body);
 
     try {
-        const savedOrder = await newOrder.save();
-        return res.status(200).json(savedOrder);
+        const { userId, products, payments, amount, username, phone, address } = req.body;
+
+        const checkUser = await User.findById(userId);
+        if (!checkUser) {
+            return res.status(400).json({ message: "User not found" })
+        }
+        // const = 
+        const order = new Order({ 
+            userId,
+            products ,
+            username: username ? username : checkUser.username,
+            phone: phone ? phone : checkUser.phone,
+            address: address ? address : checkUser.address,
+            payments,
+            amount,
+        })
+        const newOrder = await order.save();
+
+        return res.status(200).json({msg:"Đặt hàng thành công.",newOrder, status:"success"});
+
     } catch (err) {
         res.status(500).json("Không thêm được sản phẩm!");
     }
@@ -53,7 +71,7 @@ const getOrder = async (req, res) => {
 
 const getAllOrder = async (req, res) => {
     try {
-        const orders = await Order.find();
+        const orders = await Order.find().populate('products');
         return res.status(200).json(orders);
     } catch (err) {
         return res.status(500).json(err);
@@ -62,13 +80,21 @@ const getAllOrder = async (req, res) => {
 
 // Get monthly income
 const getIncome = async (req, res) => {
+    const productId = req.query.pid;
     const date = new Date();
     const lastMonth = new Date(date.setMonth(date.getMonth() - 1))
     const previousMonth = new Date(new Date().setMonth(lastMonth.getMonth() - 1))
 
     try {
         const income = await Order.aggregate([
-            { $match: { createdAt: { $gte: previousMonth } } },
+            {
+                $match: {
+                    createdAt: { $gte: previousMonth },
+                    ...(productId && {
+                        products: { $elemMatch: { productId } },
+                    }),
+                },
+            },
             {
                 $project: {
                     month: { $month: "$createdAt" },
@@ -82,9 +108,9 @@ const getIncome = async (req, res) => {
                 },
             },
         ]);
-        res.status(200).json(income);
+        return res.status(200).json(income);
     } catch (err) {
-        res.status(500).json(err);
+        return res.status(500).json(err);
     }
 
 };

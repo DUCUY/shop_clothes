@@ -4,11 +4,11 @@ const { verifyToken ,verifyTokenAndAuthorization, verifyTokenAndAdmin } = requir
 const { createOrder, updateOrder, deleteOrder, getOrder, getAllOrder, getIncome } = require("../controller/orderController");
 
 router.post("/", verifyToken, createOrder);
-router.put("/:id", verifyTokenAndAdmin, updateOrder);
-router.delete("/:id", verifyTokenAndAdmin, deleteOrder);
-router.get("/find/:userId", verifyTokenAndAuthorization, getOrder);
 router.get("/", verifyTokenAndAdmin, getAllOrder);
 router.get("/income", verifyTokenAndAdmin, getIncome);
+router.get("/find/:userId", verifyTokenAndAuthorization, getOrder);
+router.put("/:id", verifyTokenAndAdmin, updateOrder);
+router.delete("/:id", verifyTokenAndAdmin, deleteOrder);
 
 
 module.exports = router;

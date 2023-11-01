@@ -7,9 +7,17 @@ const ProductSchema = new mongoose.Schema(
             required: true,
             unique: true
         },
+       
         description: {
             type: String,
             required: true,
+        },
+        titlelazy: {
+            type: String,
+        },
+        descriptionlazy: {
+            type: String,
+
         },
         img: {
             type: String,
@@ -18,33 +26,58 @@ const ProductSchema = new mongoose.Schema(
         categories: {
             type: Array
         },
-        size: {
-            type: Array
-        },
-        color: {
-            type: Array
-        },
+        detail: [
+            {
+                size: { type: String },
+                quantity: { type: Number },
+                color: { type: String }
+
+            }
+        ],
+        size:[
+            {
+                type: String,
+            }
+        ],
+        color: [
+            {
+            type: String,
+        }
+
+        ],
         price: {
             type: Number,
             required: true
         },
-        comments: [{
-            type: mongoose.Schema.Types.ObjectId,
-            ref: 'Comment'
-        }],
-        totalRate:{
-            type:Number
+        oldprice: {
+            type: Number,
+        },
+        discount: {
+            type: String,
+        },
+        inStock: {
+            type: Number,
+            default: 0,
+        },
+        sale: {
+            type: String,
+        },
+        salepercent: {
+            type: Number,
+        },
+        totalRate: {
+            type: Number
         },
         rate: [
             {
-            userId: {
-                type: mongoose.Schema.Types.ObjectId,
-                ref: 'User',
-            },
-            star: {
-                type: Number,
-            }
-        }],
+                userId: {
+                    type: mongoose.Schema.Types.ObjectId,
+                    ref: 'User',
+                },
+                star: {
+                    type: Number,
+                }
+            }],
         favoriteUser: [
             {
 
@@ -56,14 +89,17 @@ const ProductSchema = new mongoose.Schema(
         comments: [
             {
                 userId: {
-                type: mongoose.Types.ObjectId,
-                ref: 'User'
-            },
+                    type: mongoose.Types.ObjectId,
+                    ref: 'User'
+                },
                 content: {
-                type: String,
-                // required: true
-            },
-        }
+                    type: String,
+                    // required: true
+                },
+                username: {
+                    type: String,
+                }
+            }
         ]
     },
     { timestamps: true }

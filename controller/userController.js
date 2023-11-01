@@ -5,22 +5,19 @@ const CryptoJS = require("crypto-js");
 
 // update user
 const updateUsers = async (req, res) => {
-    if (req.body.password) {
-        req.body.password = CryptoJS.AES.encrypt(
-            req.body.password,
-            process.env.PASS_SECRET
-        ).toString();
-    }
 
     try {
-        const updatedUser = await User.findByIdAndUpdate(
-            req.params.id,
-            {
-                $set: req.body,
-            },
-            { new: true }
-        );
-        return res.status(200).json({ updatedUser });
+        const updatedUser = await User.findById(req.params.id);
+        if(!updatedUser){
+            return res.status(404).json({ message:"User not found", status: "failed" });
+        }
+
+        updatedUser.username = req.body.username;
+        updatedUser.email = req.body.email;
+        updatedUser.phone = req.body.phone;
+        updatedUser.address = req.body.address;
+        const data = await  updatedUser.save();
+        return res.status(200).json({ msg:"Cập nhật thành công.",status: "successs" , data });
     } catch (err) {
         res.status(500).json("Không cập nhật được!");
     }
@@ -116,7 +113,7 @@ const updateFavorites = async (req, res) => {
             if (!product || !user) {
                 res.status(400).json({ message: 'Error somethings' })
             }
-            res.status(200).json({message: 'Cập nhật sản phẩm yêu thích thành công.', type:'delete'});
+            res.status(200).json({ message: 'Cập nhật sản phẩm yêu thích thành công.', type: 'delete' });
         } else {
             const user = await User.findByIdAndUpdate(userId, {
                 $push: { favoriteProduct: productId }
@@ -127,7 +124,7 @@ const updateFavorites = async (req, res) => {
             if (!product || !user) {
                 res.status(400).json({ message: 'Error somethings' })
             }
-            res.status(200).json({message: 'Cập nhật sản phẩm yêu thích thành công.', type:'add'});
+            res.status(200).json({ message: 'Cập nhật sản phẩm yêu thích thành công.', type: 'add' });
         }
 
     } catch (err) {
@@ -180,7 +177,7 @@ const getFavorites = async (req, res) => {
 // Add Comment 
 const comment = async (req, res) => {
     try {
-        const { userId,productId, content } = req.body;
+        const { userId, productId, content } = req.body;
         const user = await User.findById(userId);
         if (!user) {
             res.status(400).json({ message: 'User not found' });
@@ -192,11 +189,12 @@ const comment = async (req, res) => {
         }
 
         const newComment = await Product.findByIdAndUpdate(productId, {
-            $push: {comments: { userId, content } },
-            $push: { comments: { productId, content } }
-        } ,{ new: true });
+            $push: { comments: { userId, username: user.username, content } }
 
-        res.status(200).json("Bình luận thành công");
+        }, { new: true });
+        user.comments.push(newComment._id);
+        await user.save();
+        return res.status(200).json("Bình luận thành công");
 
     } catch (err) {
         return res.status(500).json("Đã xảy ra lỗi khi bình luận");
@@ -207,15 +205,17 @@ const comment = async (req, res) => {
 const deleteComment = async (req, res) => {
     try {
         const { commentId } = req.params;
-        const updatedProduct = await Product.findOneAndUpdate(
-            { "comments._id": commentId },
-            { $pull: { comments: { _id: commentId } } },
-            { new: true }
-        );
-        if (!updatedProduct) {
+        const productId = req.body.productId;
+        const product = await Product.findById(productId);
+        if (!product) {
             return res.status(404).json({ message: 'Comment not found' });
         }
-        res.status(200).json({ message: 'Bình luận đã được xóa thành công', updatedProduct });
+
+        const comments = product.comments.filter((item) => item._id.toString() !== commentId)
+        product.comments = comments;
+        await product.save();
+        return res.status(200).json({ message: 'Bình luận đã được xóa thành công' });
+
     } catch (err) {
         return res.status(500).json({ message: 'Đã xảy ra lỗi khi xóa bình luận' });
     }
@@ -234,7 +234,7 @@ const updateComment = async (req, res) => {
         if (!updatedComment) {
             return res.status(404).json({ message: 'Comment not found' });
         }
-        res.status(200).json({ message: 'Bình luận được cập nhật thành công', updatedComment });
+        return res.status(200).json({ message: 'Bình luận được cập nhật thành công', updatedComment });
     } catch (err) {
         return res.status(500).json({ message: 'Đã xảy ra lỗi khi cập nhật bình luận' });
     }
@@ -249,12 +249,15 @@ const getAllComments = async (req, res) => {
             return res.status(404).json({ message: 'Product not found' });
         }
         const comments = product.comments;
-        res.status(200).json(comments);
+        return res.status(200).json(comments);
     } catch (err) {
         return res.status(500).json({ message: 'Đã xảy ra lỗi khi lấy bình luận' });
     }
 };
 
 
-module.exports = { updateUsers, deleteUser, getUser, getAllUsers, statsUser, createFavorites, getFavorites, deleteFavorites, updateFavorites, comment,
-deleteComment, updateComment, getAllComments };
+module.exports = {
+    updateUsers, deleteUser, getUser, getAllUsers,
+    statsUser, createFavorites, getFavorites, deleteFavorites,
+    updateFavorites, comment, deleteComment, updateComment, getAllComments
+};

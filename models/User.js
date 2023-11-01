@@ -19,6 +19,12 @@ const UserSchema = new mongoose.Schema(
             type: Boolean,
             default: false,
         },
+        address: {
+            type: String,
+        },
+        phone: {
+            type: String,
+        },
         favoriteProduct: [
 
             {
@@ -29,15 +35,9 @@ const UserSchema = new mongoose.Schema(
         ],
         comments: [
             {
-               productId: {
-                type: mongoose.Types.ObjectId,
+                type: mongoose.Schema.Types.ObjectId,
                 ref: 'Product'
-            },
-                content: {
-                type: String,
-                required: true
-            },
-        }
+            }
         ]
     },
     { timestamps: true }

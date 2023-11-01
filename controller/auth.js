@@ -13,6 +13,8 @@ const createUser = async (req, res) => {
     const newUser = new User({
         username: req.body.username,
         email: req.body.email,
+        phone: req.body.phone,
+        address: req.body.address,
         password: CryptoJS.AES.encrypt(req.body.password, process.env.PASS_SECRET).toString(),
     });
 
@@ -23,6 +25,32 @@ const createUser = async (req, res) => {
         res.status(500).json(error);
     }
 };
+
+const createAdmin = async (req, res) => {
+    
+    try {
+    const check = await User.findOne({ email : req.body.email});
+    if (check) {
+      
+        return res.status(400).json( "Email đã tồn tại!" );
+    } 
+    const newUser = new User({
+        username: req.body.username,
+        email: req.body.email,
+        phone: req.body.phone,
+        password: CryptoJS.AES.encrypt(req.body.password, process.env.PASS_SECRET).toString(),
+        isAdmin: true,
+    });
+   
+
+        const savedUser = await newUser.save();
+        res.status(200).json(savedUser);
+       
+    } catch (error) {
+        res.status(500).json(error);
+      }
+};
+
 
 // Login
 const login = async (req, res) => {
@@ -71,4 +99,4 @@ const logout = async (req, res) => {
 };
 // Forget password
 
-module.exports = { createUser, login, logout };
+module.exports = { createUser, login, logout , createAdmin};
