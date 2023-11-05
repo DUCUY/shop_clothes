@@ -10,11 +10,15 @@ const cartRoute = require('./routes/cartRoute');
 const orderRoute = require('./routes/orderRoute');
 const paymentRoute = require('./routes/paymentRoute');
 
+const multer = require('multer');// fix hinh anh hoi toi
+const upload = multer();// fix hinh anh hoi toi
 
 dbConnect();
 const app = express();
 app.use(cors());
 app.use(express.json());
+app.use(upload.any()); // fix hinh anh hoi toi
+
 app.use("/api/users", userRoute);
 app.use("/api/auth", authRoute);
 app.use("/api/products", productRoute);

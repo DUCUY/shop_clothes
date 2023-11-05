@@ -2,6 +2,7 @@ const { response } = require("express");
 const Product = require("../models/Product");
 const User = require("../models/User");
 const CryptoJS = require("crypto-js");
+const Mess = require("../models/Mess");
 
 // update user
 const updateUsers = async (req, res) => {
@@ -255,9 +256,49 @@ const getAllComments = async (req, res) => {
     }
 };
 
+// Support user
+const creatMessSupport = async (req, res) => {
+    try{
+        const {username, email, phone, mess } = req.body;
+        const sup = new Mess({ username, email, phone, mess });
+        const newSup = await sup.save();
+        return res.status(200).json({msg:"Gửi tin nhắn hỗ trợ thành công.",newSup, status:"success"});
+
+    } catch(err){
+        return res.status(500).json({ message: 'Đã xảy ra lỗi gửi tin nhắn hỗ trợ.' });
+
+    };
+};
+
+// Get all mess support
+const getMessagesSupport = async (req, res) => {
+    try{
+        const mess = await Mess.find();
+        return res.status(200).json({msg:"Lấy tin nhắn hỗ trợ thành công.", mess, status:"success"});
+
+    } catch(err){
+        return res.status(500).json({ message: 'Đã xảy ra lỗi khi lấy tin nhắn hỗ trợ.' });
+
+    };
+};
+
+// Delete support
+const deleteMessagesSupport = async (req, res) => {
+    try {
+        const id = req.params.id;
+        await Mess.findByIdAndDelete(id);
+        return res.status(200).json({msg: "Cập nhật thành công.", status: "success"});
+
+    } catch (err) {
+        res.status(500).json("Đã xảy ra lỗi khi cập nhật!");
+    }
+};
+
+
 
 module.exports = {
     updateUsers, deleteUser, getUser, getAllUsers,
     statsUser, createFavorites, getFavorites, deleteFavorites,
-    updateFavorites, comment, deleteComment, updateComment, getAllComments
+    updateFavorites, comment, deleteComment, updateComment, getAllComments,  
+    creatMessSupport, getMessagesSupport, deleteMessagesSupport
 };

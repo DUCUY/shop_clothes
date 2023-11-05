@@ -77,37 +77,57 @@ const createProduct = async (req, res) => {
     }
 };
 
-
-
-
 // update product
 const updateProduct = async (req, res) => {
     try {
         const id = req.params.id;
-        const { title, description, img, categories, size, quantity, color, price } = req.body;
+        const { title, description, img, price } = req.body;
         const product = await Product.findById(id);
         if (!product) {
             return res.status(400).json("Product not found");
         }
+
         product.title = title;
         product.description = description;
         product.img = img;
-        product.categories = categories;
+        // product.categories = categories;
         product.price = price;
-        let newDetail = product.detail.map((detail) => {
-            if (detail.size === size && detail.color === color) {
-                detail.quantity = quantity;
-            }
-            return detail;
-        })
-        product.detail = newDetail;
-        await product.save();
-        return res.status(200).json("Cập nhật thành công.");
+        const data = await product.save();
+        return res.status(200).json({msg:"Cập nhật thành công.", data, status: "success"});
 
     } catch (err) {
         res.status(500).json("Không cập nhật được!");
     }
 };
+
+// // update product
+// const updateProduct = async (req, res) => {
+//     try {
+//         const id = req.params.id;
+//         const { title, description, img, categories, size, quantity, color, price } = req.body;
+//         const product = await Product.findById(id);
+//         if (!product) {
+//             return res.status(400).json("Product not found");
+//         }
+//         product.title = title;
+//         product.description = description;
+//         product.img = img;
+//         product.categories = categories;
+//         product.price = price;
+//         let newDetail = product.detail.map((detail) => {
+//             if (detail.size === size && detail.color === color) {
+//                 detail.quantity = quantity;
+//             }
+//             return detail;
+//         })
+//         product.detail = newDetail;
+//         await product.save();
+//         return res.status(200).json({msg:"Cập nhật thành công.", status: "success"});
+
+//     } catch (err) {
+//         res.status(500).json("Không cập nhật được!");
+//     }
+// };
 
 // Delete product
 const deleteProduct = async (req, res) => {

@@ -12,7 +12,7 @@ router.post("/ratings",verifyToken, vote);
 router.post("/discount/:productId",verifyTokenAndAdmin, discount);
 router.get("/ratings/:productId", getRate);
 router.get("/find/:id", getProduct);
-router.put("/:id", verifyTokenAndAdmin, updateProduct);
+router.patch("/:id", verifyTokenAndAdmin, updateProduct);
 router.delete("/:id", verifyTokenAndAdmin, deleteProduct);
 
 
